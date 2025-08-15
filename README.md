@@ -34,6 +34,7 @@ A aplicação utiliza inteligência artificial para sugerir títulos e, em segui
 ## 📂 Estrutura do Projeto
 
 /frontend → Aplicação React
+
 /backend → API Node.js
 
 
