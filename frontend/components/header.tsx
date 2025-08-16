@@ -10,14 +10,22 @@ import {
 } from "@/components/ui/sheet";
 import { LucideMenu } from "lucide-react";
 import { Button } from "./ui/button";
+import Link from "next/link";
 
 export const Header = () => {
   return (
     <header className="flex items-center justify-between p-4 border-b border-accent">
-      <div className="flex items-center gap-2">
-        <Image src={Logo} alt="MovieMind Logo" width={40} height={40} />
-        <h1 className="text-2xl font-bold">MovieMind</h1>
-      </div>
+      <Link href="/" className="flex items-center gap-2">
+        <Image
+          className="select-none"
+          src={Logo}
+          alt="MovieMind Logo"
+          width={40}
+          height={40}
+          draggable={false}
+        />
+        <h1 className="text-2xl font-bold select-none">MovieMind</h1>
+      </Link>
       <div className="flex md:hidden">
         <Sheet>
           <SheetTrigger className="cursor-pointer p-2">

@@ -1,8 +1,9 @@
 "use client";
 
+import { CategoriesCarousel } from "@/components/categories-carousel";
+import { Hero } from "@/components/hero";
 import { Button } from "@/components/ui/button";
-import { LucideImageOff, LucideInfo, LucidePlay } from "lucide-react";
-import Image from "next/image";
+import { LucideImageOff, LucideInfo } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface DataType {
@@ -40,59 +41,23 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="font-sans flex flex-1 flex-col items-center justify-center h-full pb-20 gap-16 sm:p-20">
-      <div className="flex flex-col h-full items-center w-full sm:items-start">
-        <div className="relative w-full h-[450px]">
-          {/* Imagem de fundo */}
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: "url('/Container.svg')" }}
-          />
+    <div className="font-sans flex flex-1 flex-col items-center justify-center h-full pb-20 gap-16">
+      <Hero />
 
-          {/* Gradiente em cima */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/100" />
+      <div className="w-full max-w-7xl space-y-9 mt-12 px-2">
+        <CategoriesCarousel />
 
-          {/* Conteúdo acima */}
-          <div className="relative flex flex-col items-center justify-center h-full">
-            <Image
-              src="/logo-abstract.svg"
-              alt="MovieMind"
-              width={0}
-              height={0}
-              sizes="100vw"
-              className="w-52 h-52 object-contain"
-            />
-
-            <h1 className="text-3xl mt-16 font-bold text-center">
-              Seja bem-vindo ao <br />
-              <span className="text-primary">MovieMind</span>
-            </h1>
+        <div className="w-full flex justify-between items-center px-4 sm:px-0 mb-8">
+          <div className="w-full">
+            <h2 className="text-2xl font-bold text-primary text-center xl:text-left w-full">
+              Explore as recomendações
+            </h2>
+            <p className="hidden xl:block text-zinc-400 text-sm  text-left w-full">
+              Navegue pelas recomendações para encontrar filmes que se encaixam
+              no seu gosto. Clique na seta para ver mais opções.
+            </p>
           </div>
         </div>
-
-        <div className="flex flex-col items-center justify-center gap-10 w-full px-4 sm:w-[60%]">
-          <p className="text-sm text-zinc-400 font-medium text-center">
-            Descubra novos filmes, explore e receba sugestões personalizadas que
-            se alinham com seus gostos e interesses através de um sistema de
-            recomendação inteligente.
-          </p>
-
-          <Button
-            onClick={() => {
-              console.log(movies);
-            }}
-            className="flex items-center gap-2 px-6 py-7 w-[60%] text-lg font-semibold bg-primary hover:bg-primary/90 transition-colors duration-200"
-          >
-            <LucidePlay />
-            Comece a Explorar
-          </Button>
-        </div>
-      </div>
-
-      <div className="w-full max-w-5xl mt-12 px-8">
-        <h2 className="text-2xl font-bold mb-6 text-primary text-center">
-          Explore as recomendações
-        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {movies.map((movie) => (
             <div
