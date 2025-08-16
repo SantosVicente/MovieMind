@@ -8,115 +8,106 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import React from "react";
-import Image from "next/image";
-import { LucideArrowRight } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import React, { useEffect, useState } from "react";
+import {
+  LucideArrowRight,
+  LucideZap,
+  LucideCompass,
+  LucideFilm,
+  LucideSmile,
+  LucideShield,
+  LucideBookOpen,
+  LucideUsers,
+  LucideStar,
+  LucideGhost,
+  LucideMusic,
+  LucideSearch,
+  LucideHeart,
+  LucideRocket,
+  LucideTv,
+  LucideAlertTriangle,
+  LucideSword,
+  LucideLandmark,
+  LucideFeather,
+  LucideArchive,
+} from "lucide-react";
 
-const categories = [
-  {
-    id: 28,
-    name: "Action",
-  },
-  {
-    id: 12,
-    name: "Adventure",
-  },
-  {
-    id: 16,
-    name: "Animation",
-  },
-  {
-    id: 35,
-    name: "Comedy",
-  },
-  {
-    id: 80,
-    name: "Crime",
-  },
-  {
-    id: 99,
-    name: "Documentary",
-  },
-  {
-    id: 18,
-    name: "Drama",
-  },
-  {
-    id: 10751,
-    name: "Family",
-  },
-  {
-    id: 14,
-    name: "Fantasy",
-  },
-  {
-    id: 36,
-    name: "History",
-  },
-  {
-    id: 27,
-    name: "Horror",
-  },
-  {
-    id: 10402,
-    name: "Music",
-  },
-  {
-    id: 9648,
-    name: "Mystery",
-  },
-  {
-    id: 10749,
-    name: "Romance",
-  },
-  {
-    id: 878,
-    name: "Science Fiction",
-  },
-  {
-    id: 10770,
-    name: "TV Movie",
-  },
-  {
-    id: 53,
-    name: "Thriller",
-  },
-  {
-    id: 10752,
-    name: "War",
-  },
-  {
-    id: 37,
-    name: "Western",
-  },
-];
-
-const translateCategory = (id: number) => {
-  const translations: { [key: number]: string } = {
-    28: "Ação",
-    12: "Aventura",
-    16: "Animação",
-    35: "Comédia",
-    80: "Crime",
-    99: "Documentário",
-    18: "Drama",
-    10751: "Família",
-    14: "Fantasia",
-    36: "História",
-    27: "Terror",
-    10402: "Música",
-    9648: "Mistério",
-    10749: "Romance",
-    878: "Ficção Científica",
-    10770: "Filme para TV",
-    53: "Suspense",
-    10752: "Guerra",
-    37: "Faroeste",
-  };
-  return translations[id] || id;
+const categoryIcons = {
+  28: <LucideZap size={70} />, // Ação
+  12: <LucideCompass size={70} />, // Aventura
+  16: <LucideFilm size={70} />, // Animação
+  35: <LucideSmile size={70} />, // Comédia
+  80: <LucideShield size={70} />, // Crime
+  99: <LucideBookOpen size={70} />, // Documentário
+  18: <LucideUsers size={70} />, // Drama
+  10751: <LucideStar size={70} />, // Família
+  14: <LucideGhost size={70} />, // Fantasia
+  36: <LucideLandmark size={70} />, // História
+  27: <LucideAlertTriangle size={70} />, // Terror
+  10402: <LucideMusic size={70} />, // Música
+  9648: <LucideSearch size={70} />, // Mistério
+  10749: <LucideHeart size={70} />, // Romance
+  878: <LucideRocket size={70} />, // Ficção científica
+  10770: <LucideTv size={70} />, // Cinema TV
+  53: <LucideArchive size={70} />, // Thriller
+  10752: <LucideSword size={70} />, // Guerra
+  37: <LucideFeather size={70} />, // Faroeste
 };
 
+interface Category {
+  id: number;
+  name: string;
+}
+
 export const CategoriesCarousel = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const API_URL = process.env.NEXT_PUBLIC_TMDB_API_URL;
+  const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+  const progress = count > 0 ? (current * 100) / count : 0;
+
+  useEffect(() => {
+    if (!api) return;
+
+    const update = () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+      setCount(api.scrollSnapList().length);
+    };
+
+    update();
+
+    api.on("select", update);
+
+    return () => {
+      api.off("select", update);
+    };
+  }, [api]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${API_URL}/genre/movie/list?language=pt-BR`, {
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${API_KEY}`,
+          },
+        });
+        const data = await res.json();
+        setCategories(data.genres);
+      } catch (err) {
+        console.error("Erro ao buscar filmes:", err);
+      }
+    };
+
+    if (API_URL && API_KEY && categories.length === 0) {
+      fetchCategories();
+    }
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center py-4 ">
       <div className="w-full flex justify-between items-center px-4 sm:px-0 mb-8">
@@ -135,26 +126,27 @@ export const CategoriesCarousel = () => {
         opts={{
           align: "start",
         }}
-        className="w-full relative "
+        className="w-full relative"
+        setApi={setApi}
       >
-        <div className="hidden xl:flex items-center gap-2 absolute top-0 right-10 -translate-y-12">
-          <CarouselPrevious className="text-zinc-100" />
-          <CarouselNext className="text-zinc-100" />
+        <div className="hidden xl:flex items-center justify-center w-[12rem] rounded-sm bg-zinc-900 h-10 gap-4 absolute top-0 right-0 -translate-y-18">
+          <CarouselPrevious className="text-zinc-100 rounded-sm left-2 cursor-pointer" />
+          <Progress value={progress} className="w-24 mx-12" />
+          <CarouselNext className="text-zinc-100 rounded-sm right-2 cursor-pointer" />
         </div>
         <CarouselContent>
           {categories.map((category) => (
             <CarouselItem key={category.id} className="basis-1/2 lg:basis-1/5">
-              <div className="p-0">
-                <Card className="aspect-square  rounded-xl flex flex-col items-center justify-between shadow-md">
+              <Link href={`/categories/${category.id}`} className="p-0">
+                <Card className="aspect-square rounded-xl flex flex-col items-center justify-between shadow-md hover:border hover:border-primary transition-all duration-200 bg-zinc-900">
                   <CardContent className="flex w-full flex-col items-center justify-center px-6">
                     {/* Imagem centralizada com shadow */}
-                    <div className="aspect-square w-full flex items-center justify-center  bg-zinc-800 shadow-lg">
-                      {/* Placeholder para imagem, substitua pelo src real se houver */}
-                      {/*<Image
-                        src={`/categories/${category.id}.png`}
-                        alt={category.name}
-                        className="w-12 h-12 object-contain"
-                      />8*/}
+                    <div className="aspect-square w-full flex items-center justify-center">
+                      <div className="text-primary">
+                        {categoryIcons[
+                          category.id as keyof typeof categoryIcons
+                        ] || <LucideFilm />}
+                      </div>
                     </div>
                     {/* Nome traduzido + seta */}
                     <div className="mt-2 flex items-center justify-between w-full">
@@ -165,18 +157,15 @@ export const CategoriesCarousel = () => {
                             : "text-sm"
                         }`}
                       >
-                        {translateCategory(category.id)}
+                        {category.name}
                       </span>
-                      <Link
-                        href={`/categories/${category.id}`}
-                        className="text-zinc-100"
-                      >
+                      <div className="text-zinc-100">
                         <LucideArrowRight size={18} />
-                      </Link>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-              </div>
+              </Link>
             </CarouselItem>
           ))}
         </CarouselContent>
