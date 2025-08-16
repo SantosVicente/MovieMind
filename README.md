@@ -54,7 +54,7 @@ A aplicação utiliza inteligência artificial para sugerir títulos e, em segui
 
 ### 1. Clonar o repositório
 ```bash
-git clone https://github.com/seu-usuario/cineai.git
+git clone https://github.com/SantosVicente/MovieMind.git
 ```
 ### 2. Backend
 
@@ -73,7 +73,7 @@ cd ..
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev
 ```
 
 🔑 APIs utilizadas:
