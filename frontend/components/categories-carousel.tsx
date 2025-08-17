@@ -32,6 +32,7 @@ import {
   LucideFeather,
   LucideArchive,
 } from "lucide-react";
+import { count } from "console";
 
 const categoryIcons = {
   28: <LucideZap size={70} />, // Ação
@@ -68,7 +69,7 @@ export const CategoriesCarousel = ({ categories }: CategoriesCarouselProps) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
-  const progress = count > 0 ? (current * 100) / count : 0;
+  const progress = count > 1 ? (current * 100) / count : 0;
 
   useEffect(() => {
     if (!api) return;
