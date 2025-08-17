@@ -55,16 +55,16 @@ const categoryIcons = {
   37: <LucideFeather size={70} />, // Faroeste
 };
 
-interface Category {
+export interface Category {
   id: number;
   name: string;
 }
 
-export const CategoriesCarousel = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const API_URL = process.env.NEXT_PUBLIC_TMDB_API_URL;
-  const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+interface CategoriesCarouselProps {
+  categories: Category[];
+}
 
+export const CategoriesCarousel = ({ categories }: CategoriesCarouselProps) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -86,27 +86,6 @@ export const CategoriesCarousel = () => {
       api.off("select", update);
     };
   }, [api]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await fetch(`${API_URL}/genre/movie/list?language=pt-BR`, {
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${API_KEY}`,
-          },
-        });
-        const data = await res.json();
-        setCategories(data.genres);
-      } catch (err) {
-        console.error("Erro ao buscar filmes:", err);
-      }
-    };
-
-    if (API_URL && API_KEY && categories.length === 0) {
-      fetchCategories();
-    }
-  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center py-4 ">
@@ -135,8 +114,16 @@ export const CategoriesCarousel = () => {
           <CarouselNext className="text-zinc-100 rounded-sm right-2 cursor-pointer" />
         </div>
         <CarouselContent>
+          {categories.length === 0 && (
+            <div className="flex items-center justify-center w-full py-12">
+              <p className="text-zinc-400">Nenhuma categoria encontrada.</p>
+            </div>
+          )}
           {categories.map((category) => (
-            <CarouselItem key={category.id} className="basis-1/2 lg:basis-1/5">
+            <CarouselItem
+              key={category.id}
+              className="basis-1/2 md:basis-1/3 lg:basis-1/5"
+            >
               <Link href={`/categories/${category.id}`} className="p-0">
                 <Card className="aspect-square rounded-xl flex flex-col items-center justify-between shadow-md hover:border hover:border-primary transition-all duration-200 bg-zinc-900">
                   <CardContent className="flex w-full flex-col items-center justify-center px-6">

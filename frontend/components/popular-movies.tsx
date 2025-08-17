@@ -101,6 +101,12 @@ export const PopularMovies = () => {
         </div>
 
         <CarouselContent>
+          {movies.length === 0 && (
+            <div className="flex items-center justify-center w-full py-12">
+              <p className="text-zinc-400">Nenhum filme encontrado.</p>
+            </div>
+          )}
+
           {movies.map((movie) => (
             <CarouselItem
               key={movie.id}
@@ -116,7 +122,7 @@ export const PopularMovies = () => {
                         alt={movie.title}
                         width={300}
                         height={450}
-                        className="rounded-lg object-cover w-full h-[250px] shadow-lg"
+                        className="rounded-lg object-cover w-full h-[200px] sm:h-[250px] shadow-lg"
                       />
                     ) : (
                       <div className="w-full h-[250px] flex items-center justify-center bg-zinc-700 text-white rounded-lg">

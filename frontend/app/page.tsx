@@ -1,44 +1,36 @@
 "use client";
 
-import { CategoriesCarousel } from "@/components/categories-carousel";
+import CallToAction from "@/components/call-to-action";
+import { CategoriesCarousel, Category } from "@/components/categories-carousel";
 import { Hero } from "@/components/hero";
 import { PopularMovies } from "@/components/popular-movies";
-import { Button } from "@/components/ui/button";
-import { LucideImageOff, LucideInfo } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface DataType {
-  id: number;
-  title: string;
-  genre: string;
-  releaseYear: number;
-}
-
 export default function Home() {
-  const [movies, setMovies] = useState<DataType[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const API_URL = process.env.NEXT_PUBLIC_TMDB_API_URL;
+  const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
   useEffect(() => {
-    const data: DataType[] = [
-      {
-        id: 1,
-        title: "Inception",
-        genre: "Sci-Fi",
-        releaseYear: 2010,
-      },
-      {
-        id: 2,
-        title: "The Dark Knight",
-        genre: "Action",
-        releaseYear: 2008,
-      },
-      {
-        id: 3,
-        title: "Interstellar",
-        genre: "Sci-Fi",
-        releaseYear: 2014,
-      },
-    ];
-    setMovies(data);
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${API_URL}/genre/movie/list?language=pt-BR`, {
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${API_KEY}`,
+          },
+        });
+        const data = await res.json();
+        setCategories(data.genres);
+        localStorage.setItem("categories", JSON.stringify(data.genres));
+      } catch (err) {
+        console.error("Erro ao buscar filmes:", err);
+      }
+    };
+
+    if (API_URL && API_KEY && categories.length === 0) {
+      fetchCategories();
+    }
   }, []);
 
   return (
@@ -46,9 +38,11 @@ export default function Home() {
       <Hero />
 
       <div className="w-full max-w-7xl space-y-9 mt-12 px-2">
-        <CategoriesCarousel />
+        <CategoriesCarousel categories={categories} />
 
         <PopularMovies />
+
+        <CallToAction />
       </div>
     </div>
   );
