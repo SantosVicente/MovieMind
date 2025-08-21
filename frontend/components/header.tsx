@@ -33,6 +33,8 @@ export const Header = () => {
   const handleSearch = () => {
     if (search.trim() !== "") {
       router.push(`/explore?q=${encodeURIComponent(search)}`);
+    } else {
+      router.push(`/explore`);
     }
   };
 
@@ -80,10 +82,6 @@ export const Header = () => {
       </Link>
 
       <div className="flex md:hidden">
-        {/*
-          Use controlled Sheet state to avoid passing a function as children.
-        */}
-
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger className="cursor-pointer p-2">
             <LucideMenu size={30} className="text-zinc-100" />
@@ -96,7 +94,6 @@ export const Header = () => {
               <SheetTitle className="text-xl font-bold">Menu</SheetTitle>
             </SheetHeader>
 
-            {/* Busca no topo */}
             <div className="flex items-center gap-2 mt-4 px-8">
               <Input
                 type="text"
@@ -111,14 +108,13 @@ export const Header = () => {
                 variant="ghost"
                 onClick={() => {
                   handleSearch();
-                  handleClose(); // fecha o sheet
+                  handleClose();
                 }}
               >
                 <LucideSearch className="w-5 h-5 text-zinc-400" />
               </Button>
             </div>
 
-            {/* Navegação */}
             <nav className="flex flex-col mt-6 space-y-3 px-8">
               <Link
                 href="/"
@@ -128,7 +124,6 @@ export const Header = () => {
                 Home
               </Link>
 
-              {/* Gêneros */}
               <div>
                 <h3 className="text-sm font-semibold text-zinc-300 mb-2">
                   Gêneros
@@ -248,9 +243,11 @@ export const Header = () => {
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           className="w-40 bg-zinc-800 text-white border-zinc-700"
         />
-        <Button size="icon" variant="ghost" onClick={handleSearch}>
-          <LucideSearch className="w-5 h-5 text-zinc-400" />
-        </Button>
+        <Link href="/explore">
+          <Button size="icon" variant="ghost" onClick={handleSearch}>
+            <LucideSearch className="w-5 h-5 text-zinc-400" />
+          </Button>
+        </Link>
       </div>
     </header>
   );
