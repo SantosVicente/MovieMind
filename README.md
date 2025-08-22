@@ -12,11 +12,14 @@ A aplicação utiliza inteligência artificial para sugerir títulos e, em segui
 - Construção da interface interativa.
 - Formulário para captura das preferências do usuário.
 - Exibição dinâmica dos filmes retornados pelo backend.
+- Histórico de pesquisas por período (ex: quantidade de buscas por dia/semana). -> gráfico
 
 ### **Backend** – Node.js + Express
-- Endpoint para receber as preferências do usuário.
 - Integração com a **OpenAI API** para gerar uma lista de títulos de filmes.
 - Consulta à **API do TMDb** para buscar informações completas sobre os títulos.
+- OAUTH com Google API para criação de contas (unico meio de login).
+- Rota de favoritos.
+- Rota de histórico de buscas abstratas.
 
 ### **API Externa** – TMDb
 - Fonte de dados de filmes, incluindo:
