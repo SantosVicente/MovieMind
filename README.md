@@ -81,6 +81,10 @@ npm run dev
 OpenAI: https://platform.openai.com
 TMDb: https://developer.themoviedb.org
 
+Adicionar no .env
+NEXT_PUBLIC_TMDB_API_URL=https://api.themoviedb.org/3
+NEXT_PUBLIC_TMDB_API_KEY=key
+
 ---
 
 # 📝 Requisitos do Projeto
