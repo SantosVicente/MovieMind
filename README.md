@@ -18,7 +18,7 @@ A aplicação utiliza inteligência artificial para sugerir títulos e, em segui
 - Integração com a **OpenAI API** para gerar uma lista de títulos de filmes.
 - Consulta à **API do TMDb** para buscar informações completas sobre os títulos.
 - OAUTH com Google API para criação de contas (unico meio de login).
-- Rota de favoritos.
+- Rota de favoritos (opcional)
 - Rota de histórico de buscas abstratas.
 
 ### **API Externa** – TMDb
