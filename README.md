@@ -80,3 +80,41 @@ npm run dev
 
 OpenAI: https://platform.openai.com
 TMDb: https://developer.themoviedb.org
+
+---
+
+# 📝 Requisitos do Projeto
+
+## Requisitos Funcionais (RF)
+
+Descrevem o que o sistema deve fazer. São as funcionalidades que o usuário final ou o próprio sistema precisa executar.
+
+    RF1: O usuário deve ser capaz de descrever suas preferências de filmes em um formulário de texto livre.
+
+    RF2: O sistema deve enviar a descrição do usuário para a API de IA.
+
+    RF3: A API de IA deve interpretar a descrição e retornar uma lista de títulos de filmes relevantes.
+
+    RF4: O sistema deve usar a lista de títulos para buscar informações detalhadas (sinopse, pôster, avaliação, data de lançamento) na API do TMDb.
+
+    RF5: A aplicação deve exibir uma lista de filmes recomendados, incluindo o pôster, título, ano de lançamento, nota e sinopse.
+
+    RF6: O sistema deve lidar com títulos que não sejam encontrados nas APIs e informar o usuário de forma adequada.
+
+    RF7: O usuário deve ser capaz de visualizar a interface tanto em dispositivos desktop quanto móveis (responsividade).
+
+## Requisitos Não Funcionais (RNF)
+
+Descrevem como o sistema deve funcionar, focando em qualidades como desempenho, usabilidade, segurança e escalabilidade.
+
+    RNF1 - Usabilidade: A interface deve ser intuitiva e de fácil uso, permitindo que o usuário envie suas preferências com poucos cliques.
+
+    RNF2 - Desempenho: A aplicação deve ser ágil. As recomendações devem ser exibidas em menos de 10 segundos, considerando a comunicação com as duas APIs externas.
+
+    RNF3 - Confiabilidade: O sistema deve ser capaz de lidar com falhas de conexão às APIs externas, apresentando mensagens de erro claras ao usuário.
+
+    RNF4 - Segurança: As chaves de API (OPENAI_API_KEY, TMDB_API_KEY) devem ser armazenadas de forma segura no backend (em variáveis de ambiente) e nunca expostas no código frontend.
+
+    RNF5 - Escalabilidade: A arquitetura do projeto (frontend e backend separados) deve permitir o crescimento futuro, como a adição de novas funcionalidades ou o aumento do número de usuários sem comprometer a performance.
+
+    RNF6 - Manutenibilidade: O código deve ser organizado e bem documentado, facilitando a manutenção e a adição de novas funcionalidades por outros desenvolvedores.
