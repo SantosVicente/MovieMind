@@ -243,11 +243,9 @@ export const Header = () => {
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           className="w-40 bg-zinc-800 text-white border-zinc-700"
         />
-        <Link href="/explore">
-          <Button size="icon" variant="ghost" onClick={handleSearch}>
-            <LucideSearch className="w-5 h-5 text-zinc-400" />
-          </Button>
-        </Link>
+        <Button size="icon" variant="ghost" onClick={handleSearch}>
+          <LucideSearch className="w-5 h-5 text-zinc-400" />
+        </Button>
       </div>
     </header>
   );
