@@ -32,7 +32,7 @@ import {
   LucideFeather,
   LucideArchive,
 } from "lucide-react";
-import { count } from "console";
+import { Skeleton } from "./ui/skeleton";
 
 const categoryIcons = {
   28: <LucideZap size={70} />, // Ação
@@ -69,6 +69,7 @@ export const CategoriesCarousel = ({ categories }: CategoriesCarouselProps) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const progress = count > 1 ? (current * 100) / count : 0;
 
   useEffect(() => {
@@ -87,6 +88,15 @@ export const CategoriesCarousel = ({ categories }: CategoriesCarouselProps) => {
       api.off("select", update);
     };
   }, [api]);
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      setLoading(false);
+    } else {
+      const timer = setTimeout(() => setLoading(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [categories]);
 
   return (
     <div className="flex flex-col items-center justify-center py-4 ">
@@ -115,47 +125,60 @@ export const CategoriesCarousel = ({ categories }: CategoriesCarouselProps) => {
           <CarouselNext className="text-zinc-100 rounded-sm right-2 cursor-pointer" />
         </div>
         <CarouselContent>
-          {categories.length === 0 && (
+          {loading ? (
+            Array.from({ length: 5 }).map((_, index) => (
+              <CarouselItem
+                key={index}
+                className="basis-1/2 md:basis-1/3 lg:basis-1/5"
+              >
+                <Card className="aspect-square rounded-xl flex flex-col items-center justify-between shadow-md bg-zinc-900 animate-pulse">
+                  <CardContent className="flex w-full flex-col items-center justify-center px-6 py-6">
+                    <Skeleton className="w-20 h-20 rounded-full bg-zinc-700 mb-4" />
+                    <Skeleton className="h-4 w-3/4 bg-zinc-700 rounded-md" />
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+            ))
+          ) : categories.length === 0 ? (
             <div className="flex items-center justify-center w-full py-12">
               <p className="text-zinc-400">Nenhuma categoria encontrada.</p>
             </div>
+          ) : (
+            categories.map((category) => (
+              <CarouselItem
+                key={category.id}
+                className="basis-1/2 md:basis-1/3 lg:basis-1/5"
+              >
+                <Link href={`/categories/${category.id}`} className="p-0">
+                  <Card className="aspect-square rounded-xl flex flex-col items-center justify-between shadow-md hover:border hover:border-primary transition-all duration-200 bg-zinc-900">
+                    <CardContent className="flex w-full flex-col items-center justify-center px-6">
+                      <div className="aspect-square w-full flex items-center justify-center">
+                        <div className="text-primary">
+                          {categoryIcons[
+                            category.id as keyof typeof categoryIcons
+                          ] || <LucideFilm />}
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between w-full">
+                        <span
+                          className={`text-zinc-100 font-medium ${
+                            category.id === 878
+                              ? "text-xs my-[2px] md:text-sm md:my-0"
+                              : "text-sm"
+                          }`}
+                        >
+                          {category.name}
+                        </span>
+                        <div className="text-zinc-100">
+                          <LucideArrowRight size={18} />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </CarouselItem>
+            ))
           )}
-          {categories.map((category) => (
-            <CarouselItem
-              key={category.id}
-              className="basis-1/2 md:basis-1/3 lg:basis-1/5"
-            >
-              <Link href={`/categories/${category.id}`} className="p-0">
-                <Card className="aspect-square rounded-xl flex flex-col items-center justify-between shadow-md hover:border hover:border-primary transition-all duration-200 bg-zinc-900">
-                  <CardContent className="flex w-full flex-col items-center justify-center px-6">
-                    {/* Imagem centralizada com shadow */}
-                    <div className="aspect-square w-full flex items-center justify-center">
-                      <div className="text-primary">
-                        {categoryIcons[
-                          category.id as keyof typeof categoryIcons
-                        ] || <LucideFilm />}
-                      </div>
-                    </div>
-                    {/* Nome traduzido + seta */}
-                    <div className="mt-2 flex items-center justify-between w-full">
-                      <span
-                        className={`text-zinc-100 font-medium ${
-                          category.id === 878
-                            ? "text-xs my-[2px] md:text-sm md:my-0"
-                            : "text-sm"
-                        }`}
-                      >
-                        {category.name}
-                      </span>
-                      <div className="text-zinc-100">
-                        <LucideArrowRight size={18} />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </CarouselItem>
-          ))}
         </CarouselContent>
       </Carousel>
     </div>

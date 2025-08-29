@@ -157,13 +157,6 @@ export const Header = () => {
               >
                 Sobre
               </Link>
-              <Link
-                href="/contact"
-                className="hover:text-zinc-200 text-zinc-400"
-                onClick={handleClose}
-              >
-                Contato
-              </Link>
             </nav>
           </SheetContent>
         </Sheet>
@@ -217,16 +210,6 @@ export const Header = () => {
                   className="text-lg font-medium text-zinc-400 hover:text-zinc-200 px-3 py-2"
                 >
                   Sobre
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  href="/contact"
-                  className="text-lg font-medium text-zinc-400 hover:text-zinc-200 px-3 py-2"
-                >
-                  Contato
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>

@@ -33,6 +33,7 @@ export const PopularMovies = () => {
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const progress = count > 1 ? (current * 100) / count : 0;
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!api) return;
