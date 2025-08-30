@@ -60,11 +60,11 @@ flowchart TD
 
   subgraph Frontend["🌐 Frontend"]
     Login[Login com Google OAuth]
-    About["About Us (publica)"]
-    Home[Home + Categorias + Filmes]
+    About["About Us (pública)"]
+    Home["Home + Categorias + Filmes"]
     Search["Busca por título (TMDb direto)"]
     SearchAI["Busca avançada (IA)"]
-    Analytics[Gráfico de métricas do usuário]
+    Analytics["Gráfico de métricas do usuário"]
   end
 
   subgraph Backend["🖥️ Backend"]
@@ -88,8 +88,13 @@ flowchart TD
   UI --> SearchAI
   UI --> Analytics
 
+  %% Ajustes pedidos
+  Login --> Auth
+  Home --> TMDb
+  Analytics --> Metrics
+
   Search --> TMDb
-  SearchAI --> Backend
+  SearchAI --> Recommend
 
   Backend --> Auth
   Backend --> Me
@@ -104,6 +109,7 @@ flowchart TD
   Me --> DB
   Auth --> DB
 ```
+
 
 ---
 
