@@ -51,6 +51,60 @@ A aplicação utiliza inteligência artificial para sugerir títulos e, em segui
 4. **Backend** consulta a TMDb API para cada título.
 5. **Frontend** exibe os filmes com imagem, sinopse, nota e data de lançamento.
 
+```mermaid
+flowchart TD
+
+  subgraph User["👤 Usuário"]
+    UI[Frontend React]
+  end
+
+  subgraph Frontend["🌐 Frontend"]
+    Login[Login com Google OAuth]
+    About["About Us (publica)"]
+    Home[Home + Categorias + Filmes]
+    Search["Busca por título (TMDb direto)"]
+    SearchAI["Busca avançada (IA)"]
+    Analytics[Gráfico de métricas do usuário]
+  end
+
+  subgraph Backend["🖥️ Backend"]
+    Auth[/auth/login, /auth/logout, /auth/refresh/]
+    Me[/me/]
+    Recommend[/recommendations/]
+    Metrics[/analytics/]
+  end
+
+  subgraph APIs["🔑 APIs Externas"]
+    Google[Google OAuth]
+    OpenAI[OpenAI API]
+    TMDb[TMDb API]
+  end
+
+  User --> UI
+  UI --> Login
+  UI --> About
+  UI --> Home
+  UI --> Search
+  UI --> SearchAI
+  UI --> Analytics
+
+  Search --> TMDb
+  SearchAI --> Backend
+
+  Backend --> Auth
+  Backend --> Me
+  Backend --> Recommend
+  Backend --> Metrics
+
+  Auth --> Google
+  Recommend --> OpenAI
+  Recommend --> TMDb
+  Metrics --> DB[(Banco de Dados)]
+
+  Me --> DB
+  Auth --> DB
+```
+
 ---
 
 ## ⚙️ Como Rodar o Projeto
