@@ -127,7 +127,13 @@ npm install
 # Criar um arquivo .env com as chaves:
 # OPENAI_API_KEY=chave_da_openai
 # TMDB_API_KEY=chave_do_tmdb
-npm start
+# DATABASE_URL="file:./dev.db"
+# PORT=3002
+# JWT_SECRET=""
+# GOOGLE_CLIENT_ID=""
+# GOOGLE_CLIENT_SECRET=""
+# GOOGLE_CALLBACK_URL=""
+npm run dev
 cd ..
 ```
 
