@@ -129,31 +129,30 @@ npm install
 # TMDB_API_KEY=chave_do_tmdb
 # DATABASE_URL="file:./dev.db"
 # PORT=3002
-# JWT_SECRET=""
-# GOOGLE_CLIENT_ID=""
-# GOOGLE_CLIENT_SECRET=""
-# GOOGLE_CALLBACK_URL=""
+# JWT_SECRET="" //// um jwt qualquer para segurança
+# GOOGLE_CLIENT_ID="" //seu client id criado no google console 
+# GOOGLE_CLIENT_SECRET="" //seu client secret criado no google console
+# GOOGLE_CALLBACK_URL=http://localhost:3002/auth/google/callback
 npm run dev
 cd ..
 ```
 
-# 3. Frontend
+### 3. Frontend
 
 ```bash
 cd frontend
 npm install
+# Criar um arquivo .env com as chaves:
+# NEXT_PUBLIC_TMDB_API_URL=https://api.themoviedb.org/3
+# NEXT_PUBLIC_TMDB_API_KEY= //crie sua chave no site do TMDB
+# NEXT_PUBLIC_BACKEND_URL=http://localhost:3002
 npm run dev
 ```
 
-🔑 APIs utilizadas:
+🔑 APIs externas utilizadas:
 
 OpenAI: https://platform.openai.com
 TMDb: https://developer.themoviedb.org
-
-Adicionar no .env
-NEXT_PUBLIC_TMDB_API_URL=https://api.themoviedb.org/3
-NEXT_PUBLIC_TMDB_API_KEY=key
-
 ---
 
 # 📝 Requisitos do Projeto
