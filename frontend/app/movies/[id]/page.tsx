@@ -91,8 +91,6 @@ export default function MoviePage() {
     }
   }, [id, page]);
 
-  console.log(movie);
-
   if (!movie) {
     return (
       <div className="flex justify-center items-center h-screen text-zinc-300">

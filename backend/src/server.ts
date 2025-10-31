@@ -15,7 +15,7 @@ import fastifyJwt from "@fastify/jwt";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 
-const PORT = Number(process.env.PORT || 3000);
+const PORT = Number(process.env.PORT || 3004);
 const server = Fastify({ logger: true });
 
 server.register(fastifyCors, { origin: true });
@@ -49,6 +49,14 @@ server.register(fastifySwaggerUi, {
 });
 
 server.register(authPlugin);
+
+server.decorate("authenticate", async (request: any, reply: any) => {
+  try {
+    await request.jwtVerify();
+  } catch (err) {
+    reply.send(err);
+  }
+});
 
 server.get("/auth/google/callback", async (request, reply) => {
   // @ts-ignore
@@ -96,27 +104,44 @@ server.get("/auth/google/callback", async (request, reply) => {
 
 server.get(
   "/me",
-  { preValidation: [server.authenticate ?? (async () => {})] } as any,
+  { preValidation: [server.authenticate] } as any,
   async (request, reply) => {
     try {
       const userToken = (request as any).user;
+
+      server.log.info({ userToken }, "Payload do token recebido na rota /me");
+
+      if (!userToken || typeof userToken.userId === "undefined") {
+        server.log.warn("Token JWT não continha 'userId'");
+        return reply.code(400).send({ error: "Payload do token inválido" });
+      }
+
+      const userId = Number(userToken.userId);
+
+      server.log.info(`Buscando usuário com ID: ${userId}`);
+
+      if (isNaN(userId)) {
+        server.log.error(
+          "ID do usuário é 'NaN'. O token pode estar malformado."
+        );
+        return reply.code(400).send({ error: "ID de usuário inválido" });
+      }
+
       const user = await prisma.user.findUnique({
-        where: { id: Number(userToken.userId) },
+        where: { id: userId },
       });
-      return { user };
+      if (!user) {
+        server.log.warn(`Usuário com ID ${userId} não encontrado no banco.`);
+        return reply.code(404).send({ error: "Usuário não encontrado" });
+      }
+      return user;
     } catch (err) {
-      return reply.code(401).send({ error: "Não autorizado" });
+      server.log.error(err, "ERRO CRÍTICO na rota /me");
+
+      return reply.code(500).send({ error: "Erro interno do servidor" });
     }
   }
 );
-
-server.decorate("authenticate", async (request: any, reply: any) => {
-  try {
-    await request.jwtVerify();
-  } catch (err) {
-    reply.send(err);
-  }
-});
 
 const start = async () => {
   try {
