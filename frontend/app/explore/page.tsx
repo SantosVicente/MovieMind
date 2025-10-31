@@ -16,6 +16,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MovieResult {
   id: number;
@@ -26,8 +27,11 @@ interface MovieResult {
   vote_average: number;
 }
 
+const ABSTRACT_SEARCH_URL = "http://localhost:3004/abstract-search";
+
 export default function Explore() {
   const searchParams = useSearchParams();
+  const { status } = useAuth();
   const query = searchParams.get("q");
 
   const [simpleSearchQuery, setSimpleSearchQuery] = useState("");
@@ -81,11 +85,47 @@ export default function Explore() {
     setError(null);
     setResults([]);
     setHasSearched(true);
-    console.log("Iniciando busca abstrata por:", abstractSearchQuery);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Busca abstrata concluída (simulação)");
-    setError("A busca abstrata ainda não foi implementada.");
-    setIsLoading(false);
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setError("Você precisa estar logado para usar a busca abstrata.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(ABSTRACT_SEARCH_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ description: abstractSearchQuery }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(
+          errData.error || "A IA não conseguiu processar sua solicitação."
+        );
+      }
+
+      const movies: MovieResult[] = await response.json();
+      setResults(movies);
+
+      if (movies.length === 0) {
+        setError("Não encontramos filmes para essa descrição.");
+      }
+    } catch (err) {
+      let errorMessage = "Erro ao conectar com o servidor.";
+      if (err instanceof Error) {
+        errorMessage = err.message || errorMessage;
+      }
+      console.error("Erro na busca abstrata:", err);
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -110,8 +150,14 @@ export default function Explore() {
           </TabsTrigger>
           <TabsTrigger
             value="abstract"
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer relative"
+            disabled={status !== "authenticated"}
           >
+            {status !== "authenticated" && (
+              <p className="absolute -top-9 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg  text-pink-400 text-xs shadow-lg whitespace-nowrap z-20">
+                Você precisa estar logado para usar a busca abstrata.
+              </p>
+            )}
             Busca Abstrata <LucideWand2 className="w-4 h-4" />
           </TabsTrigger>
         </TabsList>

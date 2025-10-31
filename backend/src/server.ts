@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import Fastify, { FastifyRequest, FastifyReply } from "fastify";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -14,9 +14,18 @@ import fastifyCors from "@fastify/cors";
 import fastifyJwt from "@fastify/jwt";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
+import { z } from "zod";
+import {
+  ZodTypeProvider,
+  serializerCompiler,
+  validatorCompiler,
+} from "fastify-type-provider-zod";
 
 const PORT = Number(process.env.PORT || 3004);
 const server = Fastify({ logger: true });
+
+server.setValidatorCompiler(validatorCompiler);
+server.setSerializerCompiler(serializerCompiler);
 
 server.register(fastifyCors, { origin: true });
 
@@ -139,6 +148,122 @@ server.get(
       server.log.error(err, "ERRO CRÍTICO na rota /me");
 
       return reply.code(500).send({ error: "Erro interno do servidor" });
+    }
+  }
+);
+
+const geminiApiKey = process.env.GEMINI_API_KEY || "";
+const tmdbApiKey = process.env.TMDB_API_KEY || "";
+const tmdbApiUrl = "https://api.themoviedb.org/3";
+
+const searchTmdbByTitle = async (title: string) => {
+  try {
+    const searchUrl = `${tmdbApiUrl}/search/movie?query=${encodeURIComponent(
+      title
+    )}&language=pt-BR`;
+    const res = await fetch(searchUrl, {
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${tmdbApiKey}`,
+      },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.results[0] || null;
+  } catch (error) {
+    server.log.error(error, `Falha ao buscar "${title}" no TMDB`);
+    return null;
+  }
+};
+
+server.withTypeProvider<ZodTypeProvider>().post(
+  "/abstract-search",
+  {
+    preValidation: [server.authenticate ?? (async () => {})] as any,
+    schema: {
+      body: z.object({
+        description: z.string().min(10).max(500),
+      }),
+    },
+  },
+  async (request, reply) => {
+    const { description } = request.body;
+    server.log.info(`Iniciando busca abstrata para: "${description}"`);
+
+    if (!geminiApiKey || !tmdbApiKey) {
+      server.log.error("GEMINI_API_KEY ou TMDB_API_KEY não configuradas.");
+      return reply.code(500).send({ error: "Serviço não configurado" });
+    }
+
+    let movieTitles: string[] = [];
+    try {
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`;
+
+      const systemPrompt = `Você é um especialista em cinema. Sua tarefa é ler a descrição do usuário e retornar 10 filmes que mais se encaixam nela.
+Instruções:
+1. Pense em 10 filmes relevantes.
+2. Foque em filmes conhecidos ou cult, mas também em "jóias escondidas".
+3. Retorne APENAS um objeto JSON.
+4. O objeto JSON deve ter uma única chave: "movies".
+5. O valor de "movies" deve ser um array de 10 strings, onde cada string é o título exato do filme (em inglês ou português, o que for mais comum).
+Exemplo de Saída: {"movies": ["Jumanji", "Zathura: A Space Adventure", "Night at the Museum", "Goosebumps", "The House with a Clock in Its Walls", "Lemony Snicket's A Series of Unfortunate Events", "The Spiderwick Chronicles", "Percy Jackson & the Olympians: The Lightning Thief", "Stardust", "The Chronicles of Narnia: The Lion, the Witch and the Wardrobe"]}`;
+
+      const payload = {
+        contents: [{ parts: [{ text: description }] }],
+        systemInstruction: {
+          parts: [{ text: systemPrompt }],
+        },
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              movies: {
+                type: "ARRAY",
+                items: { type: "STRING" },
+              },
+            },
+            propertyOrdering: ["movies"],
+          },
+        },
+      };
+
+      const geminiRes = await fetch(geminiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!geminiRes.ok) {
+        server.log.error(await geminiRes.text());
+        throw new Error("Erro ao consultar a IA");
+      }
+
+      const geminiData = await geminiRes.json();
+      const textResponse = geminiData.candidates[0].content.parts[0].text;
+      const parsedJson = JSON.parse(textResponse);
+
+      if (!parsedJson.movies || parsedJson.movies.length === 0) {
+        throw new Error("IA não retornou filmes");
+      }
+      movieTitles = parsedJson.movies;
+    } catch (error) {
+      server.log.error(error, "Falha na lógica do Gemini");
+      return reply
+        .code(500)
+        .send({ error: "Não foi possível gerar sugestões" });
+    }
+
+    try {
+      const moviePromises = movieTitles.map(searchTmdbByTitle);
+      const tmdbResults = await Promise.all(moviePromises);
+
+      const validMovies = tmdbResults.filter((movie) => movie !== null);
+
+      return reply.send(validMovies);
+    } catch (error) {
+      server.log.error(error, "Falha na lógica do TMDB");
+      return reply.code(500).send({ error: "Erro ao buscar dados dos filmes" });
     }
   }
 );
