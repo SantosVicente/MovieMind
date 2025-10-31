@@ -9,6 +9,7 @@ import {
   LucideSearch,
   LucideUser,
   LucideLogOut,
+  LucideLoader2,
 } from "lucide-react";
 import {
   Sheet,
@@ -38,24 +39,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { usePathname } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 const BACKEND_OAUTH_URL = "http://localhost:3004/auth/google/login";
-const BACKEND_ME_URL = "http://localhost:3004/me";
-
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  picture: string;
-}
 
 export const Header = () => {
   const router = useRouter();
-  const pathname = usePathname();
+  const { user, status, logout } = useAuth();
 
   const [search, setSearch] = useState("");
-  const [user, setUser] = useState<UserProfile | null>(null);
 
   const handleSearch = () => {
     if (search.trim() !== "") {
@@ -92,41 +84,9 @@ export const Header = () => {
     }
   }, [API_URL, API_KEY, categories.length]);
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      const token = localStorage.getItem("authToken");
-
-      if (token) {
-        try {
-          const response = await fetch(BACKEND_ME_URL, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (response.ok) {
-            const userData: UserProfile = await response.json();
-            setUser(userData);
-          } else {
-            console.error("Falha ao autenticar token. Fazendo logout.");
-            localStorage.removeItem("authToken");
-            setUser(null);
-          }
-        } catch (error) {
-          console.error("Erro ao conectar ao backend:", error);
-          localStorage.removeItem("authToken");
-          setUser(null);
-        }
-      }
-    };
-
-    fetchUserProfile();
-  }, [pathname]);
-
   const handleClose = () => setOpen(false);
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    setUser(null);
+    logout();
     handleClose();
     router.push("/");
   };
@@ -146,21 +106,33 @@ export const Header = () => {
       </Link>
 
       <div className="flex md:hidden items-center gap-2">
-        {!user ? (
+        {status === "loading" && (
+          <Button variant="ghost" size="icon" disabled>
+            <LucideLoader2 className="w-6 h-6 animate-spin" />
+          </Button>
+        )}
+
+        {status === "unauthenticated" && (
           <a href={BACKEND_OAUTH_URL}>
-            <Button variant="ghost" size="icon">
-              <LucideUser className="w-6 h-6" />
-            </Button>
+            <div className="bg-zinc-700 rounded-full cursor-pointer p-1">
+              <Avatar className="ring-2 ring-background flex items-center justify-center">
+                <LucideUser size={20} />
+              </Avatar>
+            </div>
           </a>
-        ) : (
-          <Avatar className="w-9 h-9">
-            <AvatarImage src={user.picture} alt={user.name} />
-            <AvatarFallback>
-              {user.name
-                ? user.name.charAt(0).toUpperCase()
-                : user.email.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+        )}
+
+        {status === "authenticated" && user && (
+          <div className="bg-gradient-to-b from-red-500 to-blue-500 rounded-full p-1">
+            <Avatar className="ring-2 ring-background">
+              <AvatarImage src={user.picture} alt={user.name} />
+              <AvatarFallback>
+                {user.name
+                  ? user.name.charAt(0).toUpperCase()
+                  : user.email.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </div>
         )}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger className="cursor-pointer p-2">
@@ -239,7 +211,7 @@ export const Header = () => {
               </Link>
             </nav>
 
-            {user && (
+            {status === "authenticated" && (
               <div className="mt-auto p-4 px-8 border-t border-zinc-700">
                 <Button
                   variant="ghost"
@@ -322,26 +294,35 @@ export const Header = () => {
         <Button size="icon" variant="ghost" onClick={handleSearch}>
           <LucideSearch className="w-5 h-5 text-zinc-400" />
         </Button>
-        {!user ? (
-          // Se não está logado, mostra o botão de Login
-          // Este é um LINK (<a>) e não um <Button> para causar o redirecionamento
-          <a
-            href={BACKEND_OAUTH_URL}
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
-          >
-            Login
+        {status === "loading" && (
+          <Button variant="ghost" size="icon" disabled>
+            <LucideLoader2 className="h-5 w-5 animate-spin" />
+          </Button>
+        )}
+
+        {status === "unauthenticated" && (
+          <a href={BACKEND_OAUTH_URL}>
+            <div className="bg-zinc-700 rounded-full cursor-pointer p-1">
+              <Avatar className="ring-2 ring-background flex items-center justify-center">
+                <LucideUser size={20} />
+              </Avatar>
+            </div>
           </a>
-        ) : (
+        )}
+
+        {status === "authenticated" && user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Avatar className="cursor-pointer">
-                <AvatarImage src={user.picture} alt={user.name} />
-                <AvatarFallback>
-                  {user.name
-                    ? user.name.charAt(0).toUpperCase()
-                    : user.email.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <div className="bg-gradient-to-b from-red-500 to-blue-500 rounded-full cursor-pointer p-1">
+                <Avatar className="ring-2 ring-background">
+                  <AvatarImage src={user.picture} alt={user.name} />
+                  <AvatarFallback>
+                    {user.name
+                      ? user.name.charAt(0).toUpperCase()
+                      : user.email.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-zinc-900 text-white border-zinc-700">
               <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
