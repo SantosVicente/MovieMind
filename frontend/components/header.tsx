@@ -10,6 +10,7 @@ import {
   LucideUser,
   LucideLogOut,
   LucideLoader2,
+  LucideHistory,
 } from "lucide-react";
 import {
   Sheet,
@@ -209,6 +210,16 @@ export const Header = () => {
               >
                 Sobre
               </Link>
+
+              {status === "authenticated" && (
+                <Link
+                  href="/history"
+                  className="hover:text-zinc-200 text-zinc-400 mt-2"
+                  onClick={handleClose}
+                >
+                  Histórico
+                </Link>
+              )}
             </nav>
 
             {status === "authenticated" && (
@@ -327,6 +338,12 @@ export const Header = () => {
             <DropdownMenuContent className="bg-zinc-900 text-white border-zinc-700">
               <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-zinc-700" />
+              <Link href="/history">
+                <DropdownMenuItem className="cursor-pointer focus:bg-zinc-800">
+                  <LucideHistory className="mr-2 h-4 w-4" />
+                  <span>Histórico</span>
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuItem
                 onClick={handleLogout}
                 className="cursor-pointer focus:bg-zinc-800"

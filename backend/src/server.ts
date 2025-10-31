@@ -260,10 +260,55 @@ Exemplo de Saída: {"movies": ["Jumanji", "Zathura: A Space Adventure", "Night a
 
       const validMovies = tmdbResults.filter((movie) => movie !== null);
 
+      try {
+        const userToken = (request as any).user;
+        const userId = Number(userToken.userId);
+
+        if (userId && validMovies.length > 0) {
+          await prisma.searchHistory.create({
+            data: {
+              description: description,
+              resultsJson: JSON.stringify(validMovies),
+              userId: userId,
+            },
+          });
+          server.log.info(`Histórico de busca salvo para o usuário ${userId}`);
+        }
+      } catch (dbError) {
+        server.log.error(dbError, "Falha ao salvar o histórico de busca");
+      }
+
       return reply.send(validMovies);
     } catch (error) {
       server.log.error(error, "Falha na lógica do TMDB");
       return reply.code(500).send({ error: "Erro ao buscar dados dos filmes" });
+    }
+  }
+);
+
+server.get(
+  "/my-history",
+  { preValidation: [server.authenticate] } as any,
+  async (request, reply) => {
+    try {
+      const userToken = (request as any).user;
+      const userId = Number(userToken.userId);
+
+      if (isNaN(userId)) {
+        return reply.code(400).send({ error: "ID de usuário inválido" });
+      }
+
+      const history = await prisma.searchHistory.findMany({
+        where: { userId: userId },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return reply.send(history);
+    } catch (err) {
+      server.log.error(err, "Erro ao buscar histórico do usuário");
+      return reply
+        .code(500)
+        .send({ error: "Erro interno ao buscar histórico" });
     }
   }
 );
