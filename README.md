@@ -157,7 +157,9 @@ npm run dev
 🔑 APIs externas utilizadas:
 
 Google Gemini: https://aistudio.google.com/app/apikey
+
 TMDb: https://developer.themoviedb.org
+
 ---
 
 # 📝 Requisitos do Projeto
