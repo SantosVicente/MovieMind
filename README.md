@@ -1,8 +1,7 @@
 # 🎬 MovieMind - Recomendações Inteligentes de Filmes
 Plataforma de recomendação de filmes personalizada para seus interesses pessoais.
 
-O **MovieMind** é um projeto que combina **React**, **Node.js**, **OpenAI API** e **TMDb API** para gerar recomendações de filmes personalizadas com base nos desejos do usuário.  
-A aplicação utiliza inteligência artificial para sugerir títulos e, em seguida, busca detalhes (pôster, sinopse, avaliação) na API do The Movie Database.
+O **MovieMind** é um projeto que combina **Next.js (React)**, **Node.js (Fastify)**, **Google Gemini API** e **TMDb API** para gerar recomendações de filmes personalizadas com base nos desejos do usuário. A aplicação utiliza inteligência artificial para sugerir títulos e, em seguida, busca detalhes (pôster, sinopse, avaliação) na API do The Movie Database.
 
 ---
 
@@ -10,16 +9,19 @@ A aplicação utiliza inteligência artificial para sugerir títulos e, em segui
 
 ### **Frontend** – React
 - Construção da interface interativa.
-- Formulário para captura das preferências do usuário.
+- Busca Simples: Consulta direta à API do TMDb.
+- Busca Abstrata: Formulário para captura de descrições complexas do usuário.
 - Exibição dinâmica dos filmes retornados pelo backend.
-- Histórico de pesquisas por período (ex: quantidade de buscas por dia/semana). -> gráfico
+- Página de Histórico: Exibe as buscas abstratas anteriores do usuário.
+- Autenticação: Gerenciamento de estado de login via React Context.
 
-### **Backend** – Node.js + Express
-- Integração com a **OpenAI API** para gerar uma lista de títulos de filmes.
-- Consulta à **API do TMDb** para buscar informações completas sobre os títulos.
-- OAUTH com Google API para criação de contas (unico meio de login).
-- Rota de favoritos (opcional)
-- Rota de histórico de buscas abstratas.
+### **Backend** – Node.js + Fastify
+- API REST robusta e de alta performance usando Fastify.
+- Validação de rotas e schemas com Zod.
+- Autenticação: OAUTH com Google API (único meio de login) e gerenciamento de sessão com JWT (fastify-jwt).
+- Banco de Dados: Persistência de usuários e histórico com Prisma e SQLite.
+- Rota /abstract-search: Integração com a Google Gemini API para gerar uma lista de títulos de filmes com base na descrição.
+- Rotas Protegidas: Rotas /me, /abstract-search e /my-history protegidas por autenticação JWT.
 
 ### **API Externa** – TMDb
 - Fonte de dados de filmes, incluindo:
@@ -29,85 +31,85 @@ A aplicação utiliza inteligência artificial para sugerir títulos e, em segui
   - Avaliações
 
 ### **IA** – OpenAI API
-- Interpretação das preferências do usuário.
-- Geração de lista de títulos relevantes e coerentes.
+- Interpretação das descrições abstratas do usuário.
+- Geração de lista de 10 títulos de filmes relevantes, com resposta forçada em JSON.
 
 ---
 
 ## 📂 Estrutura do Projeto
 
-/frontend → Aplicação React
+/frontend → Aplicação Next.js (App Router)
 
-/backend → API Node.js
-
+/backend → API Node.js (Fastify + Prisma)
 
 ---
 
 ## 🔄 Fluxo de Funcionamento
 
-1. **Usuário** informa suas preferências de filmes no frontend.
-2. **Backend** recebe as preferências e envia para a OpenAI API.
-3. **OpenAI API** retorna títulos de filmes que combinam com os desejos.
-4. **Backend** consulta a TMDb API para cada título.
-5. **Frontend** exibe os filmes com imagem, sinopse, nota e data de lançamento.
+1. **Usuário** faz login com Google OAuth. O **Backend** cria um usuário no DB e retorna um JWT.
+2. **Frontend** armazena o JWT e o utiliza para requisitar rotas privadas (como /me ou /abstract-search).
+3. **Usuário** descreve suas preferências na "Busca Abstrata".
+4. **Backend** (rota /abstract-search) recebe a descrição e envia para a Google Gemini API.
+5. **Gemini API** retorna 10 títulos de filmes em formato JSON que se parecem com a descrição do usuário.
+6. **Backend** consulta a TMDb API para cada um dos 10 títulos em paralelo.
+7. **Backend** salva a descrição e os resultados no banco de dados (tabela SearchHistory).
+8. **Frontend** exibe os 10 filmes com imagem, sinopse, nota e data de lançamento.
 
 ```mermaid
 flowchart TD
 
   subgraph User["👤 Usuário"]
-    UI[Frontend React]
+    UI[Frontend Next.js]
   end
 
-  subgraph Frontend["🌐 Frontend"]
-    Login[Login com Google OAuth]
-    About["About Us (pública)"]
-    Home["Home + Categorias + Filmes"]
-    Search["Busca por título (TMDb direto)"]
-    SearchAI["Busca avançada (IA)"]
-    Analytics["Gráfico de métricas do usuário"]
+  subgraph Frontend["🌐 Frontend (Next.js)"]
+    LoginBtn["Botão Login com Google"]
+    Home["Home (Pública)"]
+    SearchPage["/explore (Busca Simples/Abstrata)"]
+    HistoryPage["/history (Privada)"]
+    Callback["/auth/success (Callback)"]
   end
 
-  subgraph Backend["🖥️ Backend"]
-    Auth[/auth/login, /auth/logout, /auth/refresh/]
-    Me[/me/]
-    Recommend[/recommendations/]
-    Metrics[/analytics/]
+  subgraph Backend["🖥️ Backend (Fastify)"]
+    AuthLogin["GET /auth/google/login"]
+    AuthCallback["GET /auth/google/callback"]
+    Me["GET /me (Privado)"]
+    AbstractSearch["POST /abstract-search (Privado)"]
+    MyHistory["GET /my-history (Privado)"]
   end
 
   subgraph APIs["🔑 APIs Externas"]
     Google[Google OAuth]
-    OpenAI[OpenAI API]
+    Gemini[Google Gemini API]
     TMDb[TMDb API]
   end
 
-  User --> UI
-  UI --> Login
-  UI --> About
-  UI --> Home
-  UI --> Search
-  UI --> SearchAI
-  UI --> Analytics
+  subgraph Database["💾 Banco de Dados"]
+    DB[(SQLite / Prisma)]
+  end
 
-  %% Ajustes pedidos
-  Login --> Auth
-  Home --> TMDb
-  Analytics --> Metrics
-
-  Search --> TMDb
-  SearchAI --> Recommend
-
-  Backend --> Auth
-  Backend --> Me
-  Backend --> Recommend
-  Backend --> Metrics
-
-  Auth --> Google
-  Recommend --> OpenAI
-  Recommend --> TMDb
-  Metrics --> DB[(Banco de Dados)]
-
+  %% Fluxo de Autenticação
+  User --> LoginBtn
+  LoginBtn --> AuthLogin
+  AuthLogin --> Google
+  Google --> AuthCallback
+  AuthCallback --> DB -- Salva/Atualiza Usuário --> AuthCallback
+  AuthCallback --> Callback -- Envia JWT --> Callback
+  Callback -- Salva JWT no localStorage --> UI
+  
+  %% Fluxo de Dados
+  UI -- Rota Privada --> Me
   Me --> DB
-  Auth --> DB
+  
+  SearchPage -- Busca Simples --> TMDb
+  SearchPage -- Busca Abstrata --> AbstractSearch
+  AbstractSearch --> Gemini
+  AbstractSearch --> TMDb
+  AbstractSearch --> DB -- Salva Histórico --> AbstractSearch
+  
+  HistoryPage --> MyHistory
+  MyHistory --> DB
+  Home --> TMDb
 ```
 
 
@@ -125,14 +127,17 @@ git clone https://github.com/SantosVicente/MovieMind.git
 cd backend
 npm install
 # Criar um arquivo .env com as chaves:
-# OPENAI_API_KEY=chave_da_openai
-# TMDB_API_KEY=chave_do_tmdb
-# DATABASE_URL="file:./dev.db"
-# PORT=3002
-# JWT_SECRET="" //// um jwt qualquer para segurança
-# GOOGLE_CLIENT_ID="" //seu client id criado no google console 
-# GOOGLE_CLIENT_SECRET="" //seu client secret criado no google console
-# GOOGLE_CALLBACK_URL=http://localhost:3002/auth/google/callback
+DATABASE_URL="file:./dev.db"
+PORT=3004
+JWT_SECRET="seu-segredo-jwt-aqui"
+GOOGLE_CLIENT_ID="seu-client-id-do-google"
+GOOGLE_CLIENT_SECRET="seu-client-secret-do-google"
+GOOGLE_CALLBACK_URL=http://localhost:3004/auth/google/callback
+GEMINI_API_KEY="sua-chave-da-api-gemini"
+TMDB_API_URL=https://api.themoviedb.org/3
+TMDB_API_KEY="sua-chave-bearer-v4-do-tmdb"
+
+npx prisma migrate dev --name init
 npm run dev
 cd ..
 ```
@@ -145,13 +150,13 @@ npm install
 # Criar um arquivo .env com as chaves:
 # NEXT_PUBLIC_TMDB_API_URL=https://api.themoviedb.org/3
 # NEXT_PUBLIC_TMDB_API_KEY= //crie sua chave no site do TMDB
-# NEXT_PUBLIC_BACKEND_URL=http://localhost:3002
+# NEXT_PUBLIC_BACKEND_URL=http://localhost:3004
 npm run dev
 ```
 
 🔑 APIs externas utilizadas:
 
-OpenAI: https://platform.openai.com
+Google Gemini: https://aistudio.google.com/app/apikey
 TMDb: https://developer.themoviedb.org
 ---
 
@@ -185,7 +190,7 @@ Descrevem como o sistema deve funcionar, focando em qualidades como desempenho, 
 
     RNF3 - Confiabilidade: O sistema deve ser capaz de lidar com falhas de conexão às APIs externas, apresentando mensagens de erro claras ao usuário.
 
-    RNF4 - Segurança: As chaves de API (OPENAI_API_KEY, TMDB_API_KEY) devem ser armazenadas de forma segura no backend (em variáveis de ambiente) e nunca expostas no código frontend.
+    RNF4 - Segurança: As chaves de API (GEMINI_API_KEY, TMDB_API_KEY, JWT_SECRET) devem ser armazenadas de forma segura no backend (em variáveis de ambiente) e nunca expostas no código frontend.
 
     RNF5 - Escalabilidade: A arquitetura do projeto (frontend e backend separados) deve permitir o crescimento futuro, como a adição de novas funcionalidades ou o aumento do número de usuários sem comprometer a performance.
 
