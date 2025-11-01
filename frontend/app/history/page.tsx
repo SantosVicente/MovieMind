@@ -39,6 +39,9 @@ interface SearchHistoryItem {
   createdAt: string;
 }
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const MY_HISTORY_URL = `${BACKEND_URL}/my-history`;
+
 export default function HistoryPage() {
   const { status } = useAuth();
   const router = useRouter();
@@ -67,7 +70,7 @@ export default function HistoryPage() {
         }
 
         try {
-          const res = await fetch("http://localhost:3004/my-history", {
+          const res = await fetch(MY_HISTORY_URL, {
             headers: {
               Authorization: `Bearer ${token}`,
             },

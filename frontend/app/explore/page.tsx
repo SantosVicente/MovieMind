@@ -26,8 +26,8 @@ interface MovieResult {
   release_date: string;
   vote_average: number;
 }
-
-const ABSTRACT_SEARCH_URL = "http://localhost:3004/abstract-search";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const ABSTRACT_SEARCH_URL = `${BACKEND_URL}/abstract-search`;
 
 export default function Explore() {
   const searchParams = useSearchParams();

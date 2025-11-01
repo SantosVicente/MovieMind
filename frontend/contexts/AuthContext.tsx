@@ -9,7 +9,8 @@ import {
   ReactNode,
 } from "react";
 
-const BACKEND_ME_URL = "http://localhost:3004/me";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const BACKEND_ME_URL = `${BACKEND_URL}/me`;
 
 interface UserProfile {
   id: number;

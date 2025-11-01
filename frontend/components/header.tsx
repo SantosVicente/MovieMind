@@ -42,7 +42,8 @@ import {
 } from "./ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 
-const BACKEND_OAUTH_URL = "http://localhost:3004/auth/google/login";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const BACKEND_OAUTH_URL = `${BACKEND_URL}/auth/google/login`;
 
 export const Header = () => {
   const router = useRouter();
