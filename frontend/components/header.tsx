@@ -193,7 +193,7 @@ export const Header = () => {
                   {categories.map((category) => (
                     <li key={category.id}>
                       <Link
-                        href={`/genres/${category.id}`}
+                        href={`/categories/${category.id}`}
                         className="block px-2 py-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-sm"
                         onClick={handleClose}
                       >
@@ -269,7 +269,7 @@ export const Header = () => {
                     <li key={category.id}>
                       <NavigationMenuLink asChild>
                         <Link
-                          href={`/genres/${category.id}`}
+                          href={`/categories/${category.id}`}
                           className="block px-4 py-2 hover:bg-zinc-800"
                         >
                           {category.name}
