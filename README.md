@@ -16,10 +16,9 @@ O **MovieMind** é um projeto que combina **Next.js (React)**, **Node.js (Fastif
 - Autenticação: Gerenciamento de estado de login via React Context.
 
 ### **Backend** – Node.js + Fastify
-- API REST robusta e de alta performance usando Fastify.
-- Validação de rotas e schemas com Zod.
+- API REST usando Fastify.
 - Autenticação: OAUTH com Google API (único meio de login) e gerenciamento de sessão com JWT (fastify-jwt).
-- Banco de Dados: Persistência de usuários e histórico com Prisma e SQLite.
+- Banco de Dados: Persistência de usuários e histórico com Prisma e SQLite (PostgresSQL no deploy).
 - Rota /abstract-search: Integração com a Google Gemini API para gerar uma lista de títulos de filmes com base na descrição.
 - Rotas Protegidas: Rotas /me, /abstract-search e /my-history protegidas por autenticação JWT.
 
@@ -30,7 +29,7 @@ O **MovieMind** é um projeto que combina **Next.js (React)**, **Node.js (Fastif
   - Datas de lançamento
   - Avaliações
 
-### **IA** – OpenAI API
+### **IA** – Gemini API
 - Interpretação das descrições abstratas do usuário.
 - Geração de lista de 10 títulos de filmes relevantes, com resposta forçada em JSON.
 
