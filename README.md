@@ -5,6 +5,10 @@ O **MovieMind** é um projeto que combina **Next.js (React)**, **Node.js (Fastif
 
 ---
 
+## 📈 Arquitetura da Aplicação
+
+<img width="1600" height="863" alt="image" src="https://github.com/user-attachments/assets/794318d1-fd24-456c-bce1-f5198543ce00" />
+
 ## 🚀 Tecnologias Utilizadas
 
 ### **Frontend** – React
